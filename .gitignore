@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+settings.yaml
+*.log
+snmp.py
+oid/
