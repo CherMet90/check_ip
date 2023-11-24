@@ -1,6 +1,8 @@
 import ipaddress
+import time
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
+from functools import lru_cache
 
 from custom_modules.netbox_connector import NetboxDevice
 from snmp import SNMPDevice
@@ -14,7 +16,26 @@ app = Flask(__name__)
 class Router:
     def __init__(self, netbox_item):
         self.netbox = netbox_item
-        self.arp_table = SNMPDevice.get_network_table(self.netbox.primary_ip.address.split('/')[0], oid.general.arp_mac, 'IP-MAC')
+        self.arp_table = self.get_arp_table(self.netbox.primary_ip.address.split('/')[0])
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def get_arp_table(ip_address):
+        # Cache expires after 60 seconds 
+        ttl = 60
+        timestamp = time.time()
+        arp_table = SNMPDevice.get_network_table(ip_address, oid.general.arp_mac, 'IP-MAC')
+        return arp_table, timestamp
+
+    def is_arp_entry_valid(self):
+        arp_table, timestamp = self.arp_table
+        return (time.time() - timestamp) < 60
+
+    def refresh_arp_table(self):
+        if not self.is_arp_entry_valid():
+            self.arp_table = self.get_arp_table.cache_clear()
+            self.arp_table = self.get_arp_table(self.netbox.primary_ip.address.split('/')[0])
+        logger.debug(f'ARP-table for {self.netbox.name} was refreshed')
 
 def check_arps(ip):
     # Re-establish Netbox connection
@@ -25,7 +46,10 @@ def check_arps(ip):
     for router_vm in router_vms:
         router = Router(router_vm)
         logger.debug(f'ARP-table for {router.netbox.name} was retrieved')
-        for arp_ip in router.arp_table:
+        
+        router.refresh_arp_table()
+        logger.debug(router.arp_table[0])
+        for arp_ip in router.arp_table[0]:
             if arp_ip == str(ip).split('/')[0]:
                 logger.info(f'There is ARP entry for {ip}')
                 return True
