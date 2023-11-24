@@ -53,7 +53,7 @@ def check_ip():
             ip_in_arp = check_arps(desired_ip.strip())
             return jsonify({
                 'ip_in_arp': ip_in_arp if ip_in_arp else 'Not found',
-                'ip_in_netbox': ip_in_netbox[0].url.replace('/api', '', 1) if ip_in_netbox else None,
+                'ip_in_netbox': ip_in_netbox[0].url.replace('http://', 'https://', 1).replace('/api', '', 1) if ip_in_netbox else None,
             })
     except ValueError:
         return jsonify({'error': 'Invalid IP address'}), 400
