@@ -1,0 +1,24 @@
+/* styles.css */
+/* Custom CSS to center the spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px; /* Adjust height as needed */
+}
+/* Ensure that the form input and button are on separate lines */
+@media (max-width: 575.98px) {
+    .input-group .form-control,
+    .input-group button {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    .input-group .form-control {
+        margin-top: 0;
+    }
+}
+/* Further mobile optimizations */
+.container {
+    padding-left: 15px;
+    padding-right: 15px;
+}
