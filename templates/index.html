@@ -76,15 +76,22 @@
         function displayInfo(data) {
             const ipInfoDiv = document.getElementById('ipInfo');
     
+            let arpStatusHTML = '';
+            if (data.ip_in_arp === true) {
+                arpStatusHTML = '<p style="color: red;">Найдена ARP-запись на pfSense - IP используется</p>';
+            } else {
+                arpStatusHTML = '<p style="color: green;">ARP-запись не найдена</p>';
+            }
+    
             let ipInNetboxHTML = '';
             if (data.ip_in_netbox === null) {
-                ipInNetboxHTML = '<p>IP in Netbox: Not found</p>';
+                ipInNetboxHTML = '<p>Данные в Netbox не найдены</p>';
             } else if (data.ip_in_netbox) {
-                ipInNetboxHTML = `<p>IP in Netbox: <a href="${data.ip_in_netbox}" target="_blank">${data.ip_in_netbox}</a></p>`;
+                ipInNetboxHTML = `<p>Данные по Netbox: <a href="${data.ip_in_netbox}" target="_blank">${data.ip_in_netbox}</a></p>`;
             }
     
             ipInfoDiv.innerHTML = `
-                <p>IP in ARP: ${data.ip_in_arp}</p>
+                ${arpStatusHTML}
                 ${ipInNetboxHTML}
             `;
         }
